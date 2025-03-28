@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-geist-sans: 'geist-sans', sans-serif;
+  --font-geist-mono: 'geist-mono', sans-serif;
 }
 
 @theme inline {
