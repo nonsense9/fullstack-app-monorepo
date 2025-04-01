@@ -4,6 +4,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { AuthGuard } from "./auth.guard";
 import { CurrentUser } from "../../decorators/currentUser";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +20,12 @@ export class AuthController {
   async register(@Body() body: CreateUserDto) {
     return this.authService.register(body);
   }
+
+  @Post("refresh")
+  async refreshToken(@Body() body: RefreshTokenDto) {
+    return this.authService.refreshTokens(body);
+  }
+
 
   @UseGuards(AuthGuard)
   @Get('profile')

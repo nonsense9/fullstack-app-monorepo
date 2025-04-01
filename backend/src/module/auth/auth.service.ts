@@ -4,6 +4,17 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
+import { Role } from "@prisma/client";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
+
+interface UserEntity {
+  id: number;
+  email: string;
+  password: string;
+  role: Role;
+  refreshToken?: string;
+}
+
 @Injectable()
 export class AuthService {
 
@@ -41,24 +52,69 @@ export class AuthService {
       console.error('Registration error:', err);
       throw err;
     }
+  }
 
+  async refreshTokens(refreshTokenDto: RefreshTokenDto) {
+    try {
+      const decoded = await this.jwtService.verify(refreshTokenDto.refreshToken, {
+        secret: process.env.JWT_SECRET
+      });
+      if (!decoded) {
+        throw new UnauthorizedException('Refresh token is not valid');
+      }
+
+      const userId = decoded.sub;
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+        }
+      });
+      if (!user) {
+        throw new UnauthorizedException('Invalid user');
+      }
+      const refreshTokens = this.generateTokens(user)
+      return {
+        ...user,
+        ...refreshTokens
+      }
+    } catch (e) {
+      throw new UnauthorizedException('Unsupported refresh token or refresh token is not valid');
+    }
+  }
+
+  private generateTokens(payload: any) {
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
+      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' })
+    };
+  }
+
+  private async updateRefreshToken(userId: number, refreshToken: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken }
+    });
   }
 
   async login(loginUserDto: LoginUserDto) {
     try {
-      const user = await this.validateUser(loginUserDto);
+      const user = await this.validateUser(loginUserDto) as UserEntity;
       if (!user) {
         throw new UnauthorizedException('Invalid credentials');
       }
       const payload = {
-        sub: user['id'],
+        sub: user.id,
         email: user.email,
         role: user.role
       };
 
+      const tokens = this.generateTokens(payload)
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
       return {
         ...payload,
-        access_token: this.jwtService.sign(payload),
+        ...tokens
       };
     } catch (error) {
       console.error('Login error:', error);
