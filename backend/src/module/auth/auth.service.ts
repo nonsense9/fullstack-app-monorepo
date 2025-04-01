@@ -1,14 +1,21 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import bcrypt = require("bcrypt");
 import { LoginUserDto } from "./dto/login-user.dto";
 import { JwtService } from "@nestjs/jwt";
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
 
   constructor(private prisma: PrismaService, private jwtService: JwtService) {
+  }
+
+  async validateToken(token: string) {
+    try {
+      return await this.jwtService.verify(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 
   async register(createUserDto: CreateUserDto) {
@@ -25,6 +32,7 @@ export class AuthService {
         data: {
           email: createUserDto.email,
           password: hashedPassword,
+          role: createUserDto.role
         }
       });
       const { password, ...result } = user;
@@ -44,7 +52,8 @@ export class AuthService {
       }
       const payload = {
         sub: user['id'],
-        email: user.email
+        email: user.email,
+        role: user.role
       };
 
       return {
@@ -65,9 +74,9 @@ export class AuthService {
           id: true,
           email: true,
           password: true,
+          role: true
         }
       }) as LoginUserDto;
-
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
