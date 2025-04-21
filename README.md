@@ -21,7 +21,7 @@ React Hook Form (form handling)
 ### **Backend**
 
 Nest.js (Node.js framework)
-TypeORM (database ORM)
+Prisma (database ORM)
 PostgreSQL (database)
 Passport.js (authentication)
 JWT (JSON Web Tokens)
