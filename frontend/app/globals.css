@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@tailwind base; @tailwind components; @tailwind utilities;
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -24,8 +24,6 @@
 /* Обнуление основных отступов и полей */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 /* Установка стандартного шрифта для всего текста */

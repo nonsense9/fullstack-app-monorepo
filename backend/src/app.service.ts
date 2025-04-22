@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  isAlive(): string {
+    return `Server is alive & running on port ${process.env.PORT}`;
   }
 }

@@ -1,5 +1,7 @@
-export const Home = () => {
-    return (
-        <h2 className="text-base/7 font-semibold text-gray-900">Profilessssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</h2>)
+export default function Home() {
+  return <form>
+    <h1 className="text-3xl font-bold underline">
+      Hello world!
+    </h1>
+  </form>
 }
-export default Home;
