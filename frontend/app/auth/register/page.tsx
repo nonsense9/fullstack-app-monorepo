@@ -7,6 +7,10 @@ import { ErrorHandler } from "@/utils/errorHandler";
 
 export default function Register() {
   const { register } = useAuth();
+  const initialFormState = {
+    email: "",
+    password: ""
+  } as Partial<User>;
   const [ formState, setFormState ] = useState<Partial<User>>({
     email: "",
     password: ""
@@ -32,7 +36,7 @@ export default function Register() {
       let { status, data } = await register(formState)
       if (status) {
         alert(`User for email ${ data.email } was created with ID: ${ data.id }`);
-        setFormState({})
+        resetForm()
         setTouched({
           email: false,
           password: false,
@@ -44,6 +48,10 @@ export default function Register() {
       alert(message)
     }
     
+  }
+  
+  const resetForm = () => {
+    setFormState(initialFormState)
   }
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
