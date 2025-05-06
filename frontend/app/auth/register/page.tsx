@@ -1,60 +1,124 @@
 "use client"
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, User } from "@/hooks/useAuth";
+import { ErrorHandler } from "@/utils/errorHandler";
 
 
 export default function Register() {
   const { register } = useAuth();
-  const [ formState, setFormState ] = useState<Omit<User, "id">>({
+  const [ formState, setFormState ] = useState<Partial<User>>({
     email: "",
     password: ""
   })
+  const [ errors, setErrors ] = useState({});
+  const [ touched, setTouched ] = useState<Record<string, boolean>>({
+    email: false,
+    password: false
+  });
   
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const allTouched = Object.keys(formState).reduce((acc, field) => {
+      acc[field] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    setTouched(allTouched);
+    
     if (!validateForm()) return;
     try {
-      register(formState).then((r) => {
-        if (r.status) {}
-      }).catch(err => console.log(err));
+      let { status, data } = await register(formState)
+      if (status) {
+        alert(`User for email ${ data.email } was created with ID: ${ data.id }`);
+        setFormState({})
+        setTouched({
+          email: false,
+          password: false,
+        });
+      }
       
     } catch (err) {
-      console.log(err)
+      const { message } = ErrorHandler.handleApiError(err);
+      alert(message)
     }
     
   }
   
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
     
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    setFormState(prev => ({ ...prev, [name]: value }));
+    
+    setTouched(prev => {
+      return { ...prev, [name]: true };
+    });
   };
-  const validateForm = () => {
+  
+  
+  const validateField = (name: string, value: string) => {
+    let error = '';
     
-    const newErrors: User | {} = {};
+    if (touched[name]) {
+      switch (name) {
+        case 'email':
+          if (!value) {
+            error = 'Email required';
+          } else if (!/\S+@\S+\.\S+/.test(value)) {
+            error = 'Wrong email format';
+          }
+          break;
+        case 'password':
+          if (!value) {
+            error = 'Password required';
+          } else if (value.length < 6) {
+            error = 'Password must be at least 6 characters';
+          }
+          break;
+      }
+    }
+    
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return !error;
+  };
+  
+  const validateForm = () => {
+    const newErrors: User = {};
+    let isValid = true;
     
     if (!formState.email) {
-      newErrors.email = "Email обязателен";
+      newErrors.email = 'Email required';
+      isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(formState.email)) {
-      newErrors.email = "Неверный формат email";
+      newErrors.email = 'Wrong email format';
+      isValid = false;
     }
     
     if (!formState.password) {
-      newErrors.password = "Пароль обязателен";
+      newErrors.password = 'Password required';
+      isValid = false;
     } else if (formState.password.length < 6) {
-      newErrors.password = "Пароль должен содержать минимум 6 символов";
+      newErrors.password = 'Password must be at least 6 characters';
+      isValid = false;
     }
     
-    
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   };
-  const [ errors, setErrors ] = useState({});
+  
+  const shouldShowError = (fieldName: string) => {
+    return touched[fieldName] && errors[fieldName];
+  };
+  
+  useEffect(() => {
+    Object.keys(touched).forEach(field => {
+      if (touched[field]) {
+        validateField(field, formState[field] || '');
+      }
+    });
+  }, [ touched, formState ]);
+  
   return (
     <form className="mx-auto max-w-2xl w-full px-4 py-8" onSubmit={ (e) => handleSubmit(e) }>
       <div className="mb-5">
@@ -84,13 +148,16 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   onChange={ handleChange }
-                  defaultValue={ formState.email ? formState.email : "" }
+                  value={ formState.email ? formState.email : "" }
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
+                { shouldShowError('email') && (
+                  <small className="text-red-500">{ errors.email }</small>
+                ) }
               </div>
             </div>
             <div className="sm:col-span-3">
@@ -101,13 +168,16 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   onChange={ handleChange }
-                  defaultValue={ formState.password ? formState.password : "" }
+                  value={ formState.password ? formState.password : "" }
                   id="password"
                   name="password"
-                  type="text"
+                  type="password"
                   autoComplete="password"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
+                { shouldShowError('password') && (
+                  <small className="text-red-500">{ errors.password }</small>
+                ) }
               </div>
             </div>
           </div>
