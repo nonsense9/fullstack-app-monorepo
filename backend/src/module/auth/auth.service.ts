@@ -17,10 +17,10 @@ interface UserEntity {
 
 @Injectable()
 export class AuthService {
-
+  
   constructor(private prisma: PrismaService, private jwtService: JwtService) {
   }
-
+  
   async validateToken(token: string) {
     try {
       return await this.jwtService.verify(token);
@@ -28,15 +28,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
-
+  
   async register(createUserDto: CreateUserDto) {
     try {
       const existingUser = await this.prisma.user.findUnique({ where: { email: createUserDto.email } });
       if (existingUser) {
-
+        
         throw new ConflictException('Email already exists');
       }
-
+      
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
       const user = await this.prisma.user.create({
@@ -53,7 +53,7 @@ export class AuthService {
       throw err;
     }
   }
-
+  
   async refreshTokens(refreshTokenDto: RefreshTokenDto) {
     try {
       const decoded = await this.jwtService.verify(refreshTokenDto.refreshToken, {
@@ -62,10 +62,10 @@ export class AuthService {
       if (!decoded) {
         throw new UnauthorizedException('Refresh token is not valid');
       }
-
-      const userId = decoded.sub;
+      
+      const { sub } = decoded.sub;
       const user = await this.prisma.user.findUnique({
-        where: { id: userId },
+        where: { id: sub },
         select: {
           id: true,
           email: true,
@@ -83,21 +83,21 @@ export class AuthService {
       throw new UnauthorizedException('Unsupported refresh token or refresh token is not valid');
     }
   }
-
+  
   private generateTokens(payload: any) {
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
       refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' })
     };
   }
-
+  
   private async updateRefreshToken(userId: number, refreshToken: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken }
     });
   }
-
+  
   async login(loginUserDto: LoginUserDto) {
     try {
       const user = await this.validateUser(loginUserDto) as UserEntity;
@@ -105,11 +105,11 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
       const payload = {
-        sub: user.id,
+        id: user.id,
         email: user.email,
         role: user.role
       };
-
+      
       const tokens = this.generateTokens(payload)
       await this.updateRefreshToken(user.id, tokens.refreshToken);
       return {
@@ -121,7 +121,7 @@ export class AuthService {
       throw error;
     }
   }
-
+  
   async validateUser(loginUserDto: LoginUserDto) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -136,13 +136,13 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-
+      
       const validPassword = await bcrypt.compare(loginUserDto.password, user.password);
-
+      
       if (!validPassword) {
         throw new UnauthorizedException('Invalid password');
       }
-
+      
       const { password, ...result } = user;
       return result;
     } catch (error) {

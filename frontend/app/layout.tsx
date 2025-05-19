@@ -22,7 +22,7 @@ export default function  RootLayout({ children }: Readonly<{
 }>) {
   return (
     <html lang="en">
-      <body className={ `flex justify-center ${ geistSans.variable } ${ geistMono.variable } antialiased` }>
+      <body className={ `flex justify-center ${ geistSans.variable } ${ geistMono.variable } antialiased h-screen` }>
         { children }
       </body>
     </html>
