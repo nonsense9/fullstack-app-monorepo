@@ -1,10 +1,14 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FocusEventHandler } from 'react';
 import { useAuth, User } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/utils/errorHandler";
 
 
 type ValidationErrors = {
   [key in keyof User]?: string;
+};
+
+type TouchedFields = {
+  [key in keyof User]?: boolean;
 };
 
 interface UseAuthFormProps {
@@ -27,38 +31,9 @@ export const useAuthForm = ({
     name: '',
     ...initialValues,
   });
-  const [ touched, setTouched ] = useState<Record<string, boolean>>({
-    email: false,
-    password: false
-  });
-  
+  const [ touched, setTouched ] = useState<TouchedFields>({});
   const [ errors, setErrors ] = useState<ValidationErrors>({});
   const [ isLoading, setIsLoading ] = useState(false);
-  
-  const validateForm = () => {
-    const newErrors: User = {};
-    let isValid = true;
-    
-    if (!formData.email) {
-      newErrors.email = 'Email required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Wrong email format';
-      isValid = false;
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password required';
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-    
-    setErrors(newErrors);
-    return isValid;
-  };
-  
   
   const resetForm = () => {
     setFormData(initialValues)
@@ -69,7 +44,6 @@ export const useAuthForm = ({
   
   const validateField = (name: string, value: string) => {
     let error = '';
-    
     if (touched[name]) {
       switch (name) {
         case 'email':
@@ -90,7 +64,7 @@ export const useAuthForm = ({
     }
     
     setErrors(prev => ({ ...prev, [name]: error }));
-    return !error;
+    return error;
   };
   
   
@@ -99,9 +73,7 @@ export const useAuthForm = ({
     
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    setTouched(prev => {
-      return { ...prev, [name]: true };
-    });
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
   
   
@@ -114,7 +86,6 @@ export const useAuthForm = ({
     
     setTouched(allTouched);
     
-    if (!validateForm()) return;
     try {
       if (endpoint === "auth/register") {
         let { status, data } = await register(formData)
@@ -124,7 +95,6 @@ export const useAuthForm = ({
         }
       } else {
         let { status, data } = await login(formData)
-        console.log(data)
         
         if (status) {
           alert(`Success on login with user for email ${ data.email } with ID: ${ data.id }`);
@@ -141,6 +111,26 @@ export const useAuthForm = ({
     }
   }
   
+  const handleBlur = (e: FocusEventHandler<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouched(prev => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
+  
+  useEffect(() => {
+    Object.keys(touched).forEach(field => {
+      if (touched[field as keyof User]) {
+        const error = validateField(field as keyof User, formData[field]);
+        setErrors(prev => ({
+          ...prev,
+          [field]: error,
+        }));
+      }
+    });
+  }, [ touched, formData ]);
+  
   return {
     formData,
     errors,
@@ -149,8 +139,8 @@ export const useAuthForm = ({
     shouldShowError,
     handleChange,
     handleSubmit,
+    handleBlur,
     setFormData,
-    validateForm,
     validateField,
   };
 };

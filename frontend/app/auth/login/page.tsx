@@ -1,20 +1,15 @@
 "use client"
-import { useAuth, User } from "@/hooks/useAuth";
 import Link from "next/link";
-import { useState } from "react";
 import { useAuthForm } from "@/hooks/useAuthForm";
 
 export default function Login() {
-  const { login } = useAuth();
   const {
     formData,
     errors,
-    isLoading,
     shouldShowError,
-    validateField,
-    touched,
     handleChange,
     handleSubmit,
+    handleBlur,
   } = useAuthForm({
     endpoint: 'auth/login',
     onSuccess: (data) => {
@@ -43,6 +38,7 @@ export default function Login() {
             <div className="mt-2">
               <input
                 onChange={ handleChange }
+                onBlur={ handleBlur }
                 value={ formData.email ? formData.email : "" }
                 id="email"
                 name="email"
@@ -71,6 +67,7 @@ export default function Login() {
             <div className="mt-2">
               <input
                 onChange={ handleChange }
+                onBlur={ handleBlur }
                 value={ formData.password ? formData.password : "" }
                 id="password"
                 name="password"
@@ -94,7 +91,8 @@ export default function Login() {
             </Link>
             <button
               type="submit"
-              className="justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              disabled={errors.email || errors.password}
+              className={ `${errors.email || errors.password ? 'opacity-50': ''} justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600` }
             >
               Sign in
             </button>
@@ -102,7 +100,6 @@ export default function Login() {
         </form>
       </div>
     </div>
-    
-)
+  )
 }
 
