@@ -63,9 +63,10 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token is not valid');
       }
       
-      const { sub } = decoded.sub;
+      const { id } = decoded;
+      
       const user = await this.prisma.user.findUnique({
-        where: { id: sub },
+        where: { id },
         select: {
           id: true,
           email: true,
