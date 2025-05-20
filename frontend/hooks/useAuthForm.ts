@@ -22,6 +22,8 @@ interface UseAuthFormProps {
 export const useAuthForm = ({
                               endpoint,
                               initialValues = {},
+                              onSuccess,
+                              onError
                             }: UseAuthFormProps) => {
   const { register, login } = useAuth();
   const { handleNotification } = useNotification();
@@ -77,6 +79,28 @@ export const useAuthForm = ({
     setTouched(prev => ({ ...prev, [name]: true }));
   };
   
+  const handleSuccess = (data: Partial<User>) => {
+    const message = endpoint === "auth/register"
+      ? `User for email ${ data.email } was created with ID: ${ data.id }`
+      : `Success on login with user for email ${ data.email } with ID: ${ data.id }`;
+    
+    handleNotification(message, 'success');
+    resetForm();
+    setTouched({
+      email: false,
+      password: false,
+    });
+    
+    if (onSuccess) onSuccess(data);
+  };
+  
+  const handleError = (err: any) => {
+    const { message } = ErrorHandler.handleApiError(err);
+    handleNotification(message, 'error');
+    
+    if (onError) onError(err);
+  };
+  
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -91,12 +115,12 @@ export const useAuthForm = ({
       if (endpoint === "auth/register") {
         let { status, data } = await register(formData)
         if (status) {
-          handleNotification(`User for email ${ data.email } was created with ID: ${ data.id }`, 'success');
+          handleSuccess(data);
         }
       } else {
         let { status, data } = await login(formData)
         if (status) {
-          handleNotification(`Success on login with user for email ${ data.email } with ID: ${ data.id }`, 'success');
+          handleSuccess(data);
         }
       }
       resetForm()
@@ -105,8 +129,7 @@ export const useAuthForm = ({
         password: false,
       });
     } catch (err) {
-      const { message } = ErrorHandler.handleApiError(err);
-      handleNotification(message, 'error');
+      handleError(err);
     }
   }
   

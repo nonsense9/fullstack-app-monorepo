@@ -15,13 +15,12 @@ export default function Register() {
     endpoint: 'auth/register',
     onSuccess: (data) => {
       console.log('register successful', data);
-      
     },
     onError: (error) => {
-      console.error('Login error', error);
+      console.error('register error', error);
     }
   });
-
+  
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -83,8 +82,8 @@ export default function Register() {
             </Link>
             <button
               type="submit"
-              disabled={errors.email || errors.password}
-              className={ `${errors.email || errors.password ? 'opacity-50': ''} justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600` }
+              disabled={ errors.email || errors.password }
+              className={ `${ errors.email || errors.password ? 'opacity-50' : '' } justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600` }
             >
               Submit
             </button>

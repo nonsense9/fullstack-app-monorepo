@@ -12,6 +12,12 @@ export default function Login() {
     handleBlur,
   } = useAuthForm({
     endpoint: 'auth/login',
+    onSuccess: (data) => {
+      console.log('login successful', data);
+    },
+    onError: (error) => {
+      console.error('Login error', error);
+    }
   });
   
   return (
