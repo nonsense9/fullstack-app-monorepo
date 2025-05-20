@@ -12,13 +12,6 @@ export default function Login() {
     handleBlur,
   } = useAuthForm({
     endpoint: 'auth/login',
-    onSuccess: (data) => {
-      console.log('Login successful', data);
-      
-    },
-    onError: (error) => {
-      console.error('Login error', error);
-    }
   });
   
   return (
@@ -91,8 +84,8 @@ export default function Login() {
             </Link>
             <button
               type="submit"
-              disabled={errors.email || errors.password}
-              className={ `${errors.email || errors.password ? 'opacity-50': ''} justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600` }
+              disabled={ errors.email || errors.password }
+              className={ `${ errors.email || errors.password ? 'opacity-50' : '' } justify-center rounded-full bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600` }
             >
               Sign in
             </button>

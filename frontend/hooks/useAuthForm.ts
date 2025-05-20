@@ -1,6 +1,7 @@
 import { useState, useEffect, FocusEventHandler } from 'react';
 import { useAuth, User } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/utils/errorHandler";
+import { useNotification } from "@/context/NotificationContext";
 
 
 type ValidationErrors = {
@@ -21,10 +22,10 @@ interface UseAuthFormProps {
 export const useAuthForm = ({
                               endpoint,
                               initialValues = {},
-                              onSuccess,
-                              onError,
                             }: UseAuthFormProps) => {
   const { register, login } = useAuth();
+  const { handleNotification } = useNotification();
+  
   const [ formData, setFormData ] = useState<Partial<User>>({
     email: '',
     password: '',
@@ -90,14 +91,12 @@ export const useAuthForm = ({
       if (endpoint === "auth/register") {
         let { status, data } = await register(formData)
         if (status) {
-          alert(`User for email ${ data.email } was created with ID: ${ data.id }`);
-          
+          handleNotification(`User for email ${ data.email } was created with ID: ${ data.id }`, 'success');
         }
       } else {
         let { status, data } = await login(formData)
-        
         if (status) {
-          alert(`Success on login with user for email ${ data.email } with ID: ${ data.id }`);
+          handleNotification(`Success on login with user for email ${ data.email } with ID: ${ data.id }`, 'success');
         }
       }
       resetForm()
@@ -107,7 +106,7 @@ export const useAuthForm = ({
       });
     } catch (err) {
       const { message } = ErrorHandler.handleApiError(err);
-      alert(message)
+      handleNotification(message, 'error');
     }
   }
   
