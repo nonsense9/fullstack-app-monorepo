@@ -2,7 +2,7 @@ import { useState, useEffect, FocusEventHandler } from 'react';
 import { useAuth, User } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/utils/errorHandler";
 import { useNotification } from "@/context/NotificationContext";
-
+import Cookies from 'js-cookie';
 
 type ValidationErrors = {
   [key in keyof User]?: string;
@@ -31,7 +31,6 @@ export const useAuthForm = ({
   const [ formData, setFormData ] = useState<Partial<User>>({
     email: '',
     password: '',
-    name: '',
     ...initialValues,
   });
   const [ touched, setTouched ] = useState<TouchedFields>({});
@@ -83,7 +82,11 @@ export const useAuthForm = ({
     const message = endpoint === "auth/register"
       ? `User for email ${ data.email } was created with ID: ${ data.id }`
       : `Success on login with user for email ${ data.email } with ID: ${ data.id }`;
+    const { accessToken, refreshToken } = data;
     
+    Cookies.set('access_token', accessToken, { expires: 1 / 96 });
+    
+    Cookies.set('refresh_token', refreshToken, { expires: 7 });
     handleNotification(message, 'success');
     resetForm();
     setTouched({
