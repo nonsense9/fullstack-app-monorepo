@@ -45,28 +45,28 @@ export const useAuthForm = ({
   };
   
   const validateField = (name: string, value: string) => {
-    let error = '';
+    let errorMsg = '';
     if (touched[name]) {
       switch (name) {
         case 'email':
           if (!value) {
-            error = 'Email required';
+            errorMsg = 'Email required';
           } else if (!/\S+@\S+\.\S+/.test(value)) {
-            error = 'Wrong email format';
+            errorMsg = 'Wrong email format';
           }
           break;
         case 'password':
           if (!value) {
-            error = 'Password required';
+            errorMsg = 'Password required';
           } else if (value.length < 6) {
-            error = 'Password must be at least 6 characters';
+            errorMsg = 'Password must be at least 6 characters';
           }
           break;
       }
     }
     
-    setErrors(prev => ({ ...prev, [name]: error }));
-    return error;
+    setErrors(prev => ({ ...prev, [name]: errorMsg }));
+    return errorMsg;
   };
   
   
@@ -144,16 +144,19 @@ export const useAuthForm = ({
     }));
   };
   
-  useEffect(() => {
-    Object.keys(touched).forEach(field => {
+  const handleErrorsOnTouch = () => {
+    return Object.keys(touched).forEach(field => {
       if (touched[field as keyof User]) {
-        const error = validateField(field as keyof User, formData[field]);
+        const errorMsg = validateField(field as keyof User, formData[field]);
         setErrors(prev => ({
           ...prev,
-          [field]: error,
+          [field]: errorMsg,
         }));
       }
     });
+  }
+  useEffect(() => {
+    handleErrorsOnTouch();
   }, [ touched, formData ]);
   
   return {

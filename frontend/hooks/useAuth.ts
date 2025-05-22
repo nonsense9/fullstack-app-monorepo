@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from "@/lib/axios";
 
 export type User = {
   id: number;
@@ -10,18 +10,24 @@ export type User = {
   updatedAt: Date
   
 };
+
 export const useAuth = () => {
   
   const login = async (user: Partial<User>): Promise<any> => {
-    return axios.post(`${ process.env.NEXT_PUBLIC_SERVER_URL }/auth/login`, { ...user }, {})
+    return api.post(`${ process.env.NEXT_PUBLIC_SERVER_URL }/auth/login`, { ...user }, {})
   };
   
   const register = async (user: Partial<User>): Promise<any> => {
-    return axios.post(`${ process.env.NEXT_PUBLIC_SERVER_URL }/auth/register`, { ...user }, {})
+    return api.post(`${ process.env.NEXT_PUBLIC_SERVER_URL }/auth/register`, { ...user }, {})
+  }
+  
+  const refreshToken = async (user: Partial<User>): Promise<any> => {
+    return api.post(`${ process.env.NEXT_PUBLIC_SERVER_URL }/auth/refresh`, { ...user }, {})
   }
   
   return {
     login,
-    register
+    register,
+    refreshToken
   };
 };
