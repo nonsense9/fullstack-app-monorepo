@@ -21,7 +21,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      window.location.href = '/register';
+      window.location.href = '/auth/register';
     }
     return Promise.reject(error);
   }

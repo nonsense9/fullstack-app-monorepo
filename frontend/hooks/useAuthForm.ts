@@ -78,16 +78,20 @@ export const useAuthForm = ({
     setTouched(prev => ({ ...prev, [name]: true }));
   };
   
+  const handleCookies = ({ accessToken, refreshToken }: Partial<User>) => {
+    Cookies.set('access_token', accessToken, { expires: 1 / 96 });
+    Cookies.set('refresh_token', refreshToken, { expires: 7 });
+  }
+  
   const handleSuccess = (data: Partial<User>) => {
     const message = endpoint === "auth/register"
       ? `User for email ${ data.email } was created with ID: ${ data.id }`
       : `Success on login with user for email ${ data.email } with ID: ${ data.id }`;
-    const { accessToken, refreshToken } = data;
     
-    Cookies.set('access_token', accessToken, { expires: 1 / 96 });
-    
-    Cookies.set('refresh_token', refreshToken, { expires: 7 });
+    handleCookies(data)
+    localStorage.setItem('access_token', data.accessToken!)
     handleNotification(message, 'success');
+    
     resetForm();
     setTouched({
       email: false,
