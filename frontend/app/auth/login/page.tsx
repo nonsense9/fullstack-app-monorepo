@@ -1,8 +1,11 @@
 "use client"
 import Link from "next/link";
 import { useAuthForm } from "@/hooks/useAuthForm";
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
+  const router = useRouter();
+  
   const {
     formData,
     errors,
@@ -13,7 +16,7 @@ export default function Login() {
   } = useAuthForm({
     endpoint: 'auth/login',
     onSuccess: (data) => {
-      console.log('login successful', data);
+      router.push('/');
     },
     onError: (error) => {
       console.error('Login error', error);
@@ -21,7 +24,7 @@ export default function Login() {
   });
   
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-full h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
           Sign in to your account

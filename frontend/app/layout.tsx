@@ -22,7 +22,7 @@ export default function RootLayout({ children }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (<html lang="en">
-    <body className={ `flex justify-center ${ geistSans.variable } ${ geistMono.variable } antialiased h-screen` }>
+    <body className={ `${ geistSans.variable } ${ geistMono.variable } antialiased h-screen` }>
     <NotificationProvider>
       { children }
     </NotificationProvider>
