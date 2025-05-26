@@ -1,6 +1,8 @@
+"use client"
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from "next/link";
+import { useAuthStore } from "@/store/auth-store";
 
 interface Navbar {
   name: string,
@@ -21,6 +23,7 @@ function classNames(...classes) {
 
 
 export default function Navigation() {
+  const {isAuthenticated, login, logout} = useAuthStore();
   return (
     <Disclosure as="nav" className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -113,6 +116,9 @@ export default function Navigation() {
                     Sign out
                   </Link>
                 </MenuItem>
+                  "Here" {isAuthenticated.toString()}
+                  <button onClick={login}>login</button>
+                  <button onClick={logout}>logout</button>
               </MenuItems>
             </Menu>
           </div>

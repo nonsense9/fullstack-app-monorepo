@@ -2,6 +2,7 @@ import { useState, useEffect, FocusEventHandler } from 'react';
 import { useAuth, User } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/utils/errorHandler";
 import { useNotification } from "@/context/NotificationContext";
+import { useAuthStore } from "@/store/auth-store";
 import Cookies from 'js-cookie';
 
 type ValidationErrors = {
@@ -36,13 +37,14 @@ export const useAuthForm = ({
   const [ touched, setTouched ] = useState<TouchedFields>({});
   const [ errors, setErrors ] = useState<ValidationErrors>({});
   const [ isLoading, setIsLoading ] = useState(false);
-  
   const resetForm = () => {
     setFormData(initialValues)
   }
   const shouldShowError = (fieldName: string) => {
     return touched[fieldName] && errors[fieldName];
   };
+  
+  const store = useAuthStore()
   
   const validateField = (name: string, value: string) => {
     let errorMsg = '';
@@ -90,6 +92,7 @@ export const useAuthForm = ({
     
     handleCookies(data)
     localStorage.setItem('access_token', data.accessToken!)
+    store.login(data)
     handleNotification(message, 'success');
     
     resetForm();
