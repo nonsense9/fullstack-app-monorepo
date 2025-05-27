@@ -16,10 +16,10 @@ interface AuthActions {
 }
 
 type AuthStore = AuthState & AuthActions
-//TODO create a service for api requests
+
 export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
-  login: () => set(() => ({ isAuthenticated: true })),
+  login: () => set((data) => ({ ...data, isAuthenticated: true })),
   logout: () => set({ isAuthenticated: false }),
 }))
 
