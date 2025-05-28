@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { User } from "@/hooks/useAuth";
 interface AuthState {
   user: User | null
-  token: string | null
   isLoading: boolean
   isAuthenticated: boolean
 }

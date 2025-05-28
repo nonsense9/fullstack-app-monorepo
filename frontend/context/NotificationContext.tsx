@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useContext, useState } from 'react';
+import React, { Context, createContext, useContext, useState } from 'react';
 
 interface Notification {
   id: string
@@ -9,7 +9,7 @@ interface Notification {
 
 const NotificationContext = createContext({});
 
-export const NotificationProvider = ({ children }) => {
+export const NotificationProvider = ({ children }: {children: React.ReactNode}) => {
   const [ notifications, setNotifications ] = useState<Notification[]>([]);
   const handleNotification = (message, type = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -38,4 +38,4 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
-export const useNotification = () => useContext(NotificationContext);
+export const useNotification = () => useContext(NotificationContext) as Context<Notification>;
